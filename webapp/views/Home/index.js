@@ -1,17 +1,32 @@
 import React from 'react';
+// layouts
+import RightHeavyTwoColumnsLayout from 'layouts/RightHeavyTwoColumns';
+// page parts
+import Welcome from './Welcome';
+import LeftMenu from './LeftMenu';
+// components
+import NameForm from 'components/NameForm'; 
 
 import setName from 'actions/home/setName';
-import getIp from 'actions/home/getIp';
 
-export default ({ home: { name, ip, loading, error } }) => {
-  if (loading) return <img src={IMG_LOADING}/>;
+function HomeMain({ name, ip, loading, error }) {
+  if (loading) return <img src={IMG_LOADING} />;
   return (
     <div>
-      <p>Hello {name || 'my friend'}! {ip && `You're coming from ${ip}.`}</p>
-      { error && <p>Unable to get your public IP address.</p> }
-      <p><input type="text" onChange={e => setName(e.target.value)} /></p>
+      <Welcome {...{ name, ip, error }} />
+      <div>
+        <NameForm onChange={v => setName(v)} value={name} label="What's your name please?"/>
+      </div>
     </div>
   );
 }
 
-getIp();
+export default function Home({ home }) {
+  return (
+    <RightHeavyTwoColumnsLayout
+      LeftMenu={<LeftMenu />}
+      Main={<HomeMain {...home} />}
+      minHeight={400}
+      />
+  )
+}
