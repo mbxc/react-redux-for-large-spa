@@ -1,8 +1,10 @@
-var path = require('path');
 var webpack = require("webpack");
 var fs = require("fs");
-var util = require('util');
-var autoprefixer = require('autoprefixer');
+var path = require('path');
+
+const basePath = "";
+const outputPath = path.resolve(__dirname, process.env.NODE_ENV === "production" ? "dist" : 'build');
+const publicPath = process.env.ASSETS_PUBLIC_PATH || `${basePath}/`;
 
 // https://www.npmjs.com/package/assets-webpack-plugin
 var AssetsPlugin = require('assets-webpack-plugin');
@@ -21,7 +23,7 @@ module.exports = {
     vendors: [
       'react',
       'react-dom',
-      'react-router',
+      'react-router-dom',
       'redux',
       'react-redux',
       'react-router-redux',
@@ -30,7 +32,8 @@ module.exports = {
   },
 
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: outputPath,
+    publicPath,
     filename: 'assets/[name].[chunkhash].bundle.js',
     chunkFilename: 'assets/[name].[chunkhash].bundle.js'
   },
@@ -38,7 +41,7 @@ module.exports = {
   plugins: [
     assetsPluginInstance,
     new CaseSensitivePathsPlugin(),
-    new webpack.optimize.CommonsChunkPlugin('vendors', 'assets/vendors.[chunkhash].bundle.js'),
+    new webpack.optimize.CommonsChunkPlugin({ names: ['vendors'] }),
 
     // https://webpack.github.io/docs/long-term-caching.html
     // todo(eric): refactor by extracting the code below to an individual del tools directory
@@ -66,8 +69,8 @@ module.exports = {
             if (currentChunks.indexOf(chunk) >= 0) return;
             // delete the previous asset file.
             try {
-              fs.unlinkSync(path.join(__dirname, 'build/', chunk));
-              fs.unlinkSync(path.join(__dirname, 'build/', chunk + '.map'));
+              fs.unlinkSync(path.join(outputPath, chunk));
+              fs.unlinkSync(path.join(outputPath, chunk + '.map'));
             } catch (e) {
               console.log('#error: %s', e.message);
             }
@@ -91,14 +94,14 @@ module.exports = {
 
         stats = stats.toJson();
 
-        var existingBundles = getExistingAssetStats() || {};
+        var existingBundles = getExistingAssetStats() || { assets: [] };
 
         var appHtmlSrcPath = path.join(__dirname, 'index.html');
-        var appHtmlDstPath = path.join(__dirname, 'build/index.html');
+        var appHtmlDstPath = path.join(outputPath, 'index.html');
 
         var contents = fs.readFileSync(appHtmlSrcPath, { encoding: 'utf8' });
         contents = contents.replace(/\{assets\/(.+)\}/gi, function (m, chunkName) {
-          return getChunkAssetPath(stats.assetsByChunkName, chunkName) || m;
+          return (publicPath + getChunkAssetPath(stats.assetsByChunkName, chunkName)) || m;
         });
 
         removePreviousChunks();
@@ -116,7 +119,7 @@ module.exports = {
           JSON.stringify(stats, null, 2),
           { encoding: 'utf8' }
         );
-        console.log('#post-process: webpack assets stats updated at ', new Date());
+        console.log('## post-process: webpack assets stats updated at ', new Date());
       });
     },
     new webpack.DefinePlugin({
@@ -127,38 +130,35 @@ module.exports = {
   ],
 
   resolve: {
-    root: webapp,
-    extensions: ['', '.js', '.jsx']
+    extensions: ['.js', '.jsx'],
+    modules: ['webapp', 'node_modules']
   },
 
   module: {
-    loaders: [{
+    rules: [{
       test: /\.jsx?$/,
       exclude: /(node_modules|bower_components|vendor)/,
-      loader: 'babel',
-      query: {
-        retainLines: true,
-        cacheDirectory: true,
-        presets: ['react', 'es2015', 'stage-2']
-      }
+      use: [{
+        loader: 'babel-loader', options: {
+          retainLines: true,
+          cacheDirectory: true,
+          presets: ['env', 'react']
+        }
+      }]
     }, {
       test: /\.less$/,
       exclude: [/theme.less/, /node_modules/],
-      loader: "style!css!postcss!less"
-    }, {
-      test: /\.json$/,
-      loader: "json"
+      use: [
+        'style-loader',
+        { loader: 'css-loader', options: { importLoaders: 1 } },
+        'postcss-loader',
+        'less-loader'
+      ]
     }, {
       test: /\.jpe?g$|\.gif$|\.png$|\.svg$/i,
-      loader: "file-loader?name=[path][name].[ext]?[hash]"
+      use: [{ loader: "file-loader", options: { "name": "[path][name].[ext]?[hash]" } }]
     }]
   },
-
-  postcss: [
-    autoprefixer({
-      browsers: ['last 5 versions']
-    })
-  ],
 
   externals: {
     'lodash': '_'
