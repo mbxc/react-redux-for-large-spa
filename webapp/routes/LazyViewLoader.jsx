@@ -1,11 +1,10 @@
 import React from 'react';
 import connect from './connect';
 
-export default loadComponent => {
-  class LazyViewLoader extends React.Component {
+class LazyViewLoader extends React.Component {
     componentWillMount() {
       this.state = {};
-      loadComponent(c => this.setState({ c: c.default || c }));
+      this.props.loadComponent(c => this.setState({ c: c.default || c }));
     }
     render() {
       const { c } = this.state || {};
@@ -22,5 +21,5 @@ export default loadComponent => {
       );
     }
   }
-  return LazyViewLoader;
-}
+
+export default LazyViewLoader;

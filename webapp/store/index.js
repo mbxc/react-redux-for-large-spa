@@ -1,8 +1,11 @@
 import { createStore, applyMiddleware, compose } from "redux";
-import { routerReducer } from "react-router-redux";
+import { routerReducer, routerMiddleware } from "react-router-redux";
+import createBrowserHistory from 'history/createBrowserHistory';
 import reducers from "reducers";
 import promiseMiddleware from './promise_middleware';
 import ActionFactory from 'actions/createAction';
+
+export const history = createBrowserHistory();
 
 const rootReducer = (state, action) => {
   let newState = reducers(state, action);
@@ -11,18 +14,18 @@ const rootReducer = (state, action) => {
 }
 
 function configureStore() {
-  let middlewares = [promiseMiddleware];
+  let middlewares = [promiseMiddleware, routerMiddleware(history)];
 
   if (process.env.NODE_ENV !== 'production') {
-    const createLogger = require('redux-logger');
-    middlewares.push(createLogger());
+    const { logger } = require('redux-logger');
+    middlewares.push(logger);
   }
 
   return createStore(
     rootReducer,
     { routing: {} },
-    compose(applyMiddleware(...middlewares))
-  )
+    applyMiddleware(...middlewares)
+  );
 }
 
 const store = configureStore();
@@ -32,4 +35,4 @@ if (process.env.NODE_ENV !== 'production') {
   window.__store__ = store;
 }
 
-export default store
+export default store;

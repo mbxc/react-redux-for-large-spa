@@ -1,18 +1,15 @@
+import React from 'react';
 import connect from './connect';
 import App from 'views/App';
 import Home from './Home';
+import { Route, Redirect } from 'react-router-dom'
 
-export default [
-  {
-    path: '/',
-    component: connect(App),
-    childRoutes: [
-      Home
-    ],
-    indexRoute: {
-      onEnter: (next, replaceState) => {
-        replaceState(next.location.pathname + (next.location.pathname.endsWith('/') ? '' : '/') + 'home');
-      }
-    }
-  }
-]
+const AppContainer = connect(App);
+export default (
+  <Route path='/'>
+    <AppContainer>
+      <Route path='' exact><Redirect to="/home" /></Route>
+      {Home}
+    </AppContainer>
+  </Route>
+);
