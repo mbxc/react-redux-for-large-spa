@@ -140,9 +140,9 @@ module.exports = {
       exclude: /(node_modules|bower_components|vendor)/,
       use: [{
         loader: 'babel-loader', options: {
-          retainLines: true,
-          cacheDirectory: true,
-          presets: ['env', 'react']
+          retainLines: process.env.NODE_ENV !== 'production',
+          cacheDirectory: process.env.NODE_ENV !== 'production',
+          presets: [['env', { modules: false }], 'react']
         }
       }]
     }, {
