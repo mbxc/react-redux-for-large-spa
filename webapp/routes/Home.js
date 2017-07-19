@@ -1,7 +1,7 @@
 import React from 'react';
 import connect from './connect';
 import LazyViewLoader from './LazyViewLoader';
-import { Route, IndexRedirect } from 'react-router-dom'
+import { Route, IndexRedirect } from 'react-router'
 
 export default (
   <Route path='/home'>

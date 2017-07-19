@@ -23,7 +23,7 @@ module.exports = {
     vendors: [
       'react',
       'react-dom',
-      'react-router-dom',
+      'react-router',
       'redux',
       'react-redux',
       'react-router-redux',
@@ -131,7 +131,11 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.jsx'],
-    modules: ['webapp', 'node_modules']
+    modules: ['webapp', 'node_modules'],
+    alias: {
+      // "react": "preact-compat",
+      // "react-dom": "preact-compat"
+    }
   },
 
   module: {

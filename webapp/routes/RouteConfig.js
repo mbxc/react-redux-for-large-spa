@@ -2,7 +2,7 @@ import React from 'react';
 import connect from './connect';
 import App from 'views/App';
 import Home from './Home';
-import { Route, Redirect } from 'react-router-dom'
+import { Route, Redirect } from 'react-router'
 
 const AppContainer = connect(App);
 export default (
