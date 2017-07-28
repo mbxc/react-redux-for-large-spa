@@ -11,6 +11,7 @@ const createAction = function (actionCreator) {
     action.dispatcher = dispatchAction;
     action.type = dispatchAction.ACTION_TYPE;
     defaultStore.dispatch(action);
+    return action.promise ? action.promise : Promise.resolve(action.payload);
   }
   let actionType = process.env.NODE_ENV === 'production' ? String(actionId++) : `${actionId++}:${actionCreator.actionType || actionCreator.name}`;
   // for now action type "progress" is not utilized.

@@ -13,7 +13,10 @@ import NameForm from 'components/NameForm';
 // actions
 import setName from 'actions/home/setName';
 
-function HomeMain({ name, ip, loading, error }) {
+import getIp from 'actions/home/getIp';
+import getAddressInfo from 'actions/home/getAddressInfo';
+
+function HomeMain({ name, ip, loading, error, addressInfo }) {
   if (loading) return <img src={IMG_LOADING} />;
   return (
     <div>
@@ -21,22 +24,39 @@ function HomeMain({ name, ip, loading, error }) {
       <div>
         <NameForm onChange={v => setName(v)} value={name} label="What's your name please?" />
       </div>
+      <h3>Your address Detail</h3>
+      {JSON.stringify(addressInfo)}
     </div>
   );
 }
 
-export default function Home({ home }) {
-  return (
-    <DefaultLayout
-      Header={<Header />}
-      Footer={<Footer />}
-      Main={
-        <RightHeavyTwoColumnsLayout
-          LeftMenu={<LeftMenu />}
-          Main={<HomeMain {...home} />}
-          minHeight={400}
-        />
-      }
-    />
-  );
+class Home extends React.PureComponent {
+  componentDidMount() {
+    // an example of action chaining
+    Promise
+      .resolve()
+      // .then(openGlobalLoading)
+      .then(getIp)
+      .then(ipInfo => getAddressInfo(ipInfo.ip))
+      .then(() => {
+        // closeGlobalLoading();
+        console.log('good job!!');
+      })
+      .catch(() => {
+        // closeGlobalLoading();
+        console.log('oops, there was an error!');
+      });
+  }
+  render() {
+    const { home } = this.props;
+    return (
+      <RightHeavyTwoColumnsLayout
+        LeftMenu={<LeftMenu />}
+        Main={<HomeMain {...home} />}
+        minHeight={400}
+      />
+    );
+  }
 }
+
+export default Home;
