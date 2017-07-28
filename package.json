@@ -8,6 +8,7 @@
     "url": "https://github.com/mbxc/react-redux-for-large-spa.git"
   },
   "scripts": {
+    "start": "npx webpack-dev-server --debug --progress --watch --colors --devtool cheap-module-eval-source-map",
     "dev": "bash -c 'rm -rf build; webpack --debug --progress --watch --colors --devtool cheap-module-eval-source-map'",
     "dev-build": "rm -rf build; webpack --debug --devtool cheap-module-eval-source-map",
     "dist": "bash -c 'rm -rf dist; NODE_ENV=production webpack -p --optimize-minimize'",
@@ -45,7 +46,9 @@
   },
   "devDependencies": {
     "babel-preset-react-hmre": "^1.1.1",
+    "babel-preset-stage-2": "^6.24.1",
     "case-sensitive-paths-webpack-plugin": "^2.1.1",
+    "html-webpack-plugin": "^2.29.0",
     "react-addons-perf": "^15.4.2",
     "react-transform-render-visualizer": "^0.4.0",
     "redux-devtools": "^3.4.0",
