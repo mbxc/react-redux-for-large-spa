@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import connect from './connect';
 
 class LazyViewLoader extends React.PureComponent {
@@ -23,7 +22,7 @@ class LazyViewLoader extends React.PureComponent {
         const Component = connect(mod);
         this.setState({
           c: mod,
-          Component: <Component {...props} />
+          Component
         });
       }
     });
@@ -31,7 +30,7 @@ class LazyViewLoader extends React.PureComponent {
 
   render() {
     const { Component } = this.state || {};
-    if (Component) return React.cloneElement(Component, {...this.props});
+    if (Component) return <Component {...this.props} />
     return (
       <div style={{ height: '100%' }}>
         <div
