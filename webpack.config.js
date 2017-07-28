@@ -1,9 +1,13 @@
-var webpack = require("webpack");
-var fs = require("fs");
-var path = require('path');
+const webpack = require('webpack');
+const fs = require('fs');
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const basePath = "";
-const outputPath = path.resolve(__dirname, process.env.NODE_ENV === "production" ? "dist" : 'build');
+const basePath = '';
+const outputPath = path.resolve(
+  __dirname,
+  process.env.NODE_ENV === 'production' ? 'dist' : 'build'
+);
 const publicPath = process.env.ASSETS_PUBLIC_PATH || `${basePath}/`;
 
 // https://www.npmjs.com/package/assets-webpack-plugin
@@ -45,10 +49,8 @@ module.exports = {
 
     // https://webpack.github.io/docs/long-term-caching.html
     // todo(eric): refactor by extracting the code below to an individual del tools directory
-    function () {
-
-      this.plugin('done', function (stats) {
-
+    function() {
+      this.plugin('done', function(stats) {
         // helper function that gets the bundle path from the asset stats
         function getChunkAssetPath(assetsByChunkName, chunkName) {
           if (assetsByChunkName && assetsByChunkName[chunkName]) {
@@ -62,7 +64,9 @@ module.exports = {
         }
 
         function removePreviousChunks(chunkName) {
-          const previousChunks = existingBundles.assets.map(asset => asset.name);
+          const previousChunks = existingBundles.assets.map(
+            asset => asset.name
+          );
           const currentChunks = stats.assets.map(asset => asset.name);
 
           previousChunks.forEach(chunk => {
@@ -100,18 +104,20 @@ module.exports = {
         var appHtmlDstPath = path.join(outputPath, 'index.html');
 
         var contents = fs.readFileSync(appHtmlSrcPath, { encoding: 'utf8' });
-        contents = contents.replace(/\{assets\/(.+)\}/gi, function (m, chunkName) {
-          return (publicPath + getChunkAssetPath(stats.assetsByChunkName, chunkName)) || m;
+        contents = contents.replace(/\{assets\/(.+)\}/gi, function(
+          m,
+          chunkName
+        ) {
+          return (
+            publicPath +
+              getChunkAssetPath(stats.assetsByChunkName, chunkName) || m
+          );
         });
 
         removePreviousChunks();
 
         // update app.html in build/ directory
-        fs.writeFileSync(
-          appHtmlDstPath,
-          contents,
-          { encoding: 'utf8' }
-        );
+        fs.writeFileSync(appHtmlDstPath, contents, { encoding: 'utf8' });
 
         // update the assets stats.
         fs.writeFileSync(
@@ -119,13 +125,24 @@ module.exports = {
           JSON.stringify(stats, null, 2),
           { encoding: 'utf8' }
         );
-        console.log('## post-process: webpack assets stats updated at ', new Date());
+        console.log(
+          '## post-process: webpack assets stats updated at ',
+          new Date()
+        );
       });
     },
     new webpack.DefinePlugin({
       'process.env': {
-        'NODE_ENV': process.env.NODE_ENV === 'production' ? '"production"' : '"development"'
+        NODE_ENV:
+          process.env.NODE_ENV === 'production'
+            ? '"production"'
+            : '"development"'
       }
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: path.join(__dirname, 'index.html'),
+      cache: true
     })
   ],
 
@@ -137,34 +154,48 @@ module.exports = {
       // "react-dom": "preact-compat"
     }
   },
-
+  devServer: {
+    historyApiFallback: true
+  },
   module: {
-    rules: [{
-      test: /\.jsx?$/,
-      exclude: /(node_modules|bower_components|vendor)/,
-      use: [{
-        loader: 'babel-loader', options: {
-          retainLines: process.env.NODE_ENV !== 'production',
-          cacheDirectory: process.env.NODE_ENV !== 'production',
-          presets: [['env', { modules: false }], 'react']
-        }
-      }]
-    }, {
-      test: /\.less$/,
-      exclude: [/theme.less/, /node_modules/],
-      use: [
-        'style-loader',
-        { loader: 'css-loader', options: { importLoaders: 1 } },
-        'postcss-loader',
-        'less-loader'
-      ]
-    }, {
-      test: /\.jpe?g$|\.gif$|\.png$|\.svg$/i,
-      use: [{ loader: "file-loader", options: { "name": "[path][name].[ext]?[hash]" } }]
-    }]
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /(node_modules|bower_components|vendor)/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              retainLines: process.env.NODE_ENV !== 'production',
+              cacheDirectory: process.env.NODE_ENV !== 'production',
+              presets: [['env', { modules: false }], 'react', 'stage-2']
+            }
+          }
+        ]
+      },
+      {
+        test: /\.less$/,
+        exclude: [/theme.less/, /node_modules/],
+        use: [
+          'style-loader',
+          { loader: 'css-loader', options: { importLoaders: 1 } },
+          'postcss-loader',
+          'less-loader'
+        ]
+      },
+      {
+        test: /\.jpe?g$|\.gif$|\.png$|\.svg$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: { name: '[path][name].[ext]?[hash]' }
+          }
+        ]
+      }
+    ]
   },
 
   externals: {
-    'lodash': '_'
+    lodash: '_'
   }
 };

@@ -1,8 +1,5 @@
 import React from 'react';
 
-import getIp from 'actions/home/getIp';
-getIp();
-
 export default function HomePageWelcomePart({ name, ip, error }) {
   return (
     <div>
