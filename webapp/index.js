@@ -1,4 +1,4 @@
-import boot from 'routes/boot';
+import boot from './boot';
 
 window.IMG_LOADING = $('img#loading').attr('src');
 

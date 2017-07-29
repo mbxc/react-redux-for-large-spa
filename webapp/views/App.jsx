@@ -1,17 +1,20 @@
 import React from 'react';
 
-import DefaultLayout from 'layouts/Default';
-import Header from './shared/Header';
-import Footer from './shared/Footer';
+import { Route, Switch, Redirect } from 'react-router';
+import ViewLoader from './ViewLoader';
+import PageNotFound from './NotFound';
 
 require('./base.less');
 
-export default function App({ children }) {
+const HomeViewLoader = () => import("./Home");
+export default function App(props) {
   return (
-    <DefaultLayout
-      Header={<Header />}
-      Footer={<Footer />}
-      Main={children}
-      />
+    <Switch>
+      <Route path='/' exact><Redirect to="/home" /></Route>
+      <Route path="/home" exact>
+        <ViewLoader loader={HomeViewLoader} {...props} />
+      </Route>
+      <PageNotFound />
+    </Switch>
   );
-}  
+}

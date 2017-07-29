@@ -42,7 +42,10 @@ module.exports = {
     assetsPluginInstance,
     new CaseSensitivePathsPlugin(),
     new webpack.optimize.CommonsChunkPlugin({ names: ['vendors'] }),
-
+    new webpack.optimize.AggressiveMergingPlugin(),
+    new webpack.optimize.MinChunkSizePlugin({
+      minChunkSize: 100000
+    }),
     // https://webpack.github.io/docs/long-term-caching.html
     // todo(eric): refactor by extracting the code below to an individual del tools directory
     function () {
@@ -143,10 +146,24 @@ module.exports = {
       test: /\.jsx?$/,
       exclude: /(node_modules|bower_components|vendor)/,
       use: [{
-        loader: 'babel-loader', options: {
+        loader: 'babel-loader',
+        options: {
           retainLines: process.env.NODE_ENV !== 'production',
           cacheDirectory: process.env.NODE_ENV !== 'production',
-          presets: [['env', { modules: false }], 'react']
+          presets: [
+            'env',
+            'react'
+          ],
+          plugins: [
+            ['transform-runtime', {
+              'helpers': false, // defaults to true 
+              'polyfill': false, // defaults to true 
+              'regenerator': true, // defaults to true 
+              'moduleName': 'babel-runtime' // defaults to "babel-runtime" 
+            }],
+            ['transform-object-rest-spread', { 'useBuiltIns': true }],
+            ['syntax-dynamic-import']
+          ]
         }
       }]
     }, {
